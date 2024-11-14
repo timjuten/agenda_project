@@ -9,6 +9,7 @@ object Main extends ZIOCliDefault {
   sealed trait Subcommand extends Product with Serializable
   object Subcommand {
     final case class Add(date: LocalDate, text: List[String]) extends Subcommand
+    final case class Finish(id: BigInt) extends Subcommand
   }
 
   val dateOptions: Options[LocalDate] = Options.localDate("d").alias("date")
@@ -20,8 +21,16 @@ object Main extends ZIOCliDefault {
         Subcommand.Add(date = date, text = text)
       }
 
+      val indexOptions: Options[BigInt] = Options.integer("i")
+  val finishHelp: HelpDoc = HelpDoc.p("Mark task as done")
+  val finish =
+    Command("finish", indexOptions, Args.none)
+      .withHelp(finishHelp)
+      .map { case (id) =>
+        Subcommand.Finish(id = id)
+      }
   val agenda: Command[Subcommand] =
-    Command("agenda", Options.none, Args.none).subcommands(add)
+    Command("agenda", Options.none, Args.none).subcommands(add, finish)
 
   val cliApp = CliApp.make(
     name = "Agenda",
@@ -32,6 +41,7 @@ object Main extends ZIOCliDefault {
     printLine(
       s"Executing `agenda add $date` ${text.mkString(" ")}"
     )
- 
+  case Subcommand.Finish(id) =>
+    printLine(s"Task with id=$id is finished")
   }
 }
