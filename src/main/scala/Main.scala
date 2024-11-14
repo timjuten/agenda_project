@@ -55,8 +55,10 @@ object Main extends ZIOCliDefault {
     )
     case Subcommand.Show => 
       printLine("Here is the list of all existing tasks")
-    case cmd => printLine(s"Unknown subcommand: $cmd")
- case Subcommand.Finish(id) =>
+      case Subcommand.Finish(id) =>
     printLine(s"Task with id=$id is finished")
+  
+    case cmd => printLine(s"Unknown subcommand: $cmd")
   }
+ 
 }
