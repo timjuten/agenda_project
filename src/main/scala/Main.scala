@@ -16,6 +16,7 @@ object Main extends ZIOCliDefault {
   object Subcommand {
     final case class Add(date: LocalDate, text: List[String]) extends Subcommand
     final case class Finish(id: BigInt) extends Subcommand
+    final case class Remove(id: BigInt) extends Subcommand
     final case object Show extends Subcommand
   }
 
@@ -28,6 +29,12 @@ object Main extends ZIOCliDefault {
         Subcommand.Add(date = date, text = text)
       }
 
+      val showHelp: HelpDoc = HelpDoc.p("Show list of tasks")
+      val show = Command("show", Options.none, Args.none)
+      .withHelp(showHelp)
+      .map { case _ => Subcommand.Show}
+
+
       val indexOptions: Options[BigInt] = Options.integer("i")
   val finishHelp: HelpDoc = HelpDoc.p("Mark task as done")
   val finish =
@@ -36,13 +43,22 @@ object Main extends ZIOCliDefault {
       .map { case (id) =>
         Subcommand.Finish(id = id)
       }
+      val removeHelp: HelpDoc = HelpDoc.p("The task has been deleted")
+  val remove =
+    Command("remove", indexOptions, Args.none)
+      .withHelp(removeHelp)
+      .map { case (id) =>
+        Subcommand.Remove(id = id)
+      }
+
+
   val showHelp: HelpDoc = HelpDoc.p("Show list of tasks")
   val show = Command("show", Options.none, Args.none)
   .withHelp(showHelp)
   .map{ case _ => Subcommand.Show}
 
   val agenda: Command[Subcommand] =
-    Command("agenda", Options.none, Args.none).subcommands(add, finish, show)
+    Command("agenda", Options.none, Args.none).subcommands(add, show, finish, remove)
 
   val cliApp = CliApp.make(
     name = "Agenda",
@@ -57,6 +73,8 @@ object Main extends ZIOCliDefault {
       printLine("Here is the list of all existing tasks")
       case Subcommand.Finish(id) =>
     printLine(s"Task with id=$id is finished")
+    case Subcommand.Remove(id) =>
+    printLine(s"Task with id=$id is removed")  
   
     case cmd => printLine(s"Unknown subcommand: $cmd")
   }
