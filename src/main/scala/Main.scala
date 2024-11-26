@@ -6,8 +6,42 @@ import java.time.LocalDate
 import logic.Logic
 import logic.DefaultLogic
 import zio.ZIO
+import java.sql.{Connection, DriverManager, ResultSet}
+import java.sql.Date
 
 object Main extends ZIOCliDefault {
+  // val dbUrl = "jdbc:sqlite:data.db"
+  // // Establish a connection to SQLite
+  // def connect(): Connection =
+  //   try {
+  //     println("About to establish connection")
+  //     val conn = DriverManager.getConnection(dbUrl)
+  //     println("connection established")
+  //     conn
+  //   } finally {
+  //     println("finally")
+  //   }
+
+  // def initDatabase(): Unit = {
+  //   println("Database connect!")
+  //   val conn = connect()
+  //   println("Create statement")
+  //   try {
+  //     val statement = conn.createStatement()
+  //     val createTableSQL =
+  //       """CREATE TABLE IF NOT EXISTS tasks (
+  //         |  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  //         |  status TEXT NOT NULL,
+  //         |  date DATETIME NOT NULL,
+  //         |  text TEXT NOT NULL
+  //         |);""".stripMargin
+  //     println("Before execution")
+  //     statement.execute(createTableSQL)
+  //     println("Database initialized!")
+  //   } finally {
+  //     conn.close()
+  //   }
+  // }
   /*Implement list
    * agenda show/list as synonim
    * What do we need:
@@ -80,7 +114,7 @@ object Main extends ZIOCliDefault {
         _ <- ZIO.succeed(
           DefaultLogic.add(date = date, text = text.mkString(" "))
         )
-        _ <- printLine(DefaultLogic.show())
+        // _ <- printLine(DefaultLogic.show())
       } yield ()
     }
     case Subcommand.Show =>
