@@ -1,4 +1,4 @@
-import Dependencies.* 
+import Dependencies.*
 
 ThisBuild / scalaVersion := "2.13.12"
 ThisBuild / version := "0.1.0-SNAPSHOT"
@@ -9,5 +9,7 @@ lazy val agenda = (project in file("."))
     name := "agenda",
     libraryDependencies += Zio,
     libraryDependencies += ZioCli,
+    libraryDependencies += Sqlite,
+    libraryDependencies += Slf4j,
     libraryDependencies += Munit % Test
   )
