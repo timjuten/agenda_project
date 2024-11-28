@@ -13,4 +13,3 @@ lazy val agenda = (project in file("."))
     libraryDependencies += Slf4j,
     libraryDependencies += Munit % Test
   )
-

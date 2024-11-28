@@ -3,52 +3,15 @@ import zio.cli.HelpDoc.Span.text
 import zio.cli._
 
 import java.time.LocalDate
-import logic.Logic
-import logic.DefaultLogic
+import agenda.AgendaService
+import agenda.AgendaServiceSQLite
 import zio.ZIO
 import java.sql.{Connection, DriverManager, ResultSet}
 import java.sql.Date
 
 object Main extends ZIOCliDefault {
-  // val dbUrl = "jdbc:sqlite:data.db"
-  // // Establish a connection to SQLite
-  // def connect(): Connection =
-  //   try {
-  //     println("About to establish connection")
-  //     val conn = DriverManager.getConnection(dbUrl)
-  //     println("connection established")
-  //     conn
-  //   } finally {
-  //     println("finally")
-  //   }
 
-  // def initDatabase(): Unit = {
-  //   println("Database connect!")
-  //   val conn = connect()
-  //   println("Create statement")
-  //   try {
-  //     val statement = conn.createStatement()
-  //     val createTableSQL =
-  //       """CREATE TABLE IF NOT EXISTS tasks (
-  //         |  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  //         |  status TEXT NOT NULL,
-  //         |  date DATETIME NOT NULL,
-  //         |  text TEXT NOT NULL
-  //         |);""".stripMargin
-  //     println("Before execution")
-  //     statement.execute(createTableSQL)
-  //     println("Database initialized!")
-  //   } finally {
-  //     conn.close()
-  //   }
-  // }
-  /*Implement list
-   * agenda show/list as synonim
-   * What do we need:
- - Create Show Subcommand which will list all the Tasks.
- - add Show subcommand to the agenda command
- - process it
-   */
+  val agendaService = AgendaServiceSQLite
   sealed trait Subcommand extends Product with Serializable
   object Subcommand {
     final case class Add(date: LocalDate, text: List[String]) extends Subcommand
@@ -106,24 +69,12 @@ object Main extends ZIOCliDefault {
     summary = text("The best agenda console tool instument"),
     command = agenda
   ) {
-    case Subcommand.Add(date, text) => {
-      for {
-        _ <- printLine(
-          s"Executing `agenda add $date` ${text.mkString(" ")}"
-        )
-        _ <- ZIO.succeed(
-          DefaultLogic.add(date = date, text = text.mkString(" "))
-        )
-        // _ <- printLine(DefaultLogic.show())
-      } yield ()
-    }
-    case Subcommand.Show =>
-      printLine("Here is the list of all existing tasks")
-    case Subcommand.Finish(id) =>
-      printLine(s"Task with id=$id is finished")
+    case Subcommand.Add(date, text) =>
+      ZIO.succeed(agendaService.add(date = date, text = text.mkString(" ")))
+    case Subcommand.Show       => printLine(agendaService.show().mkString("\n"))
+    case Subcommand.Finish(id) => printLine(s"Task with id=$id is finished")
     case Subcommand.Remove(id) =>
       printLine(s"Task with id=$id is removed")
-
     case cmd => printLine(s"Unknown subcommand: $cmd")
   }
 
