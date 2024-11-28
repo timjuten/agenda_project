@@ -1,10 +1,10 @@
+package agenda
+
 import zio.Console.printLine
 import zio.cli.HelpDoc.Span.text
 import zio.cli._
 
 import java.time.LocalDate
-import agenda.AgendaService
-import agenda.AgendaServiceSQLite
 import zio.ZIO
 import java.sql.{Connection, DriverManager, ResultSet}
 import java.sql.Date
@@ -28,11 +28,6 @@ object Main extends ZIOCliDefault {
       .map { case (date, text) =>
         Subcommand.Add(date = date, text = text)
       }
-
-  val showHelp: HelpDoc = HelpDoc.p("Show list of tasks")
-  val show = Command("show", Options.none, Args.none)
-    .withHelp(showHelp)
-    .map { case _ => Subcommand.Show }
 
   val indexOptions: Options[BigInt] = Options.integer("i")
   val finishHelp: HelpDoc = HelpDoc.p("Mark task as done")
