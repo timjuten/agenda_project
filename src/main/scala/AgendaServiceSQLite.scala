@@ -7,11 +7,12 @@ import java.sql.{Connection, DriverManager, ResultSet}
 import java.sql.Date
 import AgendaService.Status
 import scala.util.Try
-// lihaoyi https://github.com/com-lihaoyi/scalasql/blob/main/scalasql/test/src/example/SqliteExample.scala
+import java.net.URLEncoder
 
 object AgendaServiceSQLite extends AgendaService {
 
-  val dbUrl = "jdbc:sqlite:data.db"
+  val file = "/var/tmp/data.db"
+  val dbUrl = s"jdbc:sqlite:" + file
 
   override def add(date: LocalDate, text: String): Unit = {
     initDatabase()
