@@ -1,17 +1,21 @@
-package agenda
+package nl.rasom.workshop.agenda.console
 
+import nl.rasom.workshop.agenda.service.AgendaService
 import zio.Console.printLine
+import zio.{IO, Scope, ZIO, ZIOAppArgs}
 import zio.cli.HelpDoc.Span.text
 import zio.cli._
+import nl.rasom.workshop.agenda.domain.Task
 
-import java.time.LocalDate
-import zio.ZIO
-import java.sql.{Connection, DriverManager, ResultSet}
+import java.io.IOException
+import java.sql.Connection
 import java.sql.Date
+import java.sql.DriverManager
+import java.sql.ResultSet
+import java.time.LocalDate
 
-object Main extends ZIOCliDefault {
+object AgendaZioCli {
 
-  val agendaService = AgendaServiceSQLite
   sealed trait Subcommand extends Product with Serializable
   object Subcommand {
     final case class Add(date: LocalDate, text: List[String]) extends Subcommand
@@ -58,19 +62,28 @@ object Main extends ZIOCliDefault {
       remove
     )
 
-  val cliApp = CliApp.make(
+  def logic(
+      agendaService: AgendaService
+  ): Subcommand => IO[IOException, Unit] = (subcommand: Subcommand) =>
+    subcommand match {
+      case Subcommand.Add(date, text) =>
+        ZIO.succeed(
+          agendaService.add(Task(date = date, text = text.mkString(" ")))
+        )
+      case Subcommand.Show => printLine(agendaService.show().mkString("\n"))
+      case Subcommand.Finish(id) => printLine(s"Task with id=$id is finished")
+      case Subcommand.Remove(id) =>
+        printLine(s"Task with id=$id is removed")
+      case cmd => printLine(s"Unknown subcommand: $cmd")
+    }
+
+  def make(
+      agendaService: AgendaService
+  ): CliApp[Any with ZIOAppArgs with Scope, Any, Subcommand] = CliApp.make(
     name = "Agenda",
     version = "0.0.1",
     summary = text("The best agenda console tool instument"),
     command = agenda
-  ) {
-    case Subcommand.Add(date, text) =>
-      ZIO.succeed(agendaService.add(date = date, text = text.mkString(" ")))
-    case Subcommand.Show       => printLine(agendaService.show().mkString("\n"))
-    case Subcommand.Finish(id) => printLine(s"Task with id=$id is finished")
-    case Subcommand.Remove(id) =>
-      printLine(s"Task with id=$id is removed")
-    case cmd => printLine(s"Unknown subcommand: $cmd")
-  }
+  ) { logic(agendaService) }
 
 }
