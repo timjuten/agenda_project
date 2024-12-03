@@ -70,7 +70,14 @@ object AgendaZioCli {
         ZIO.succeed(
           agendaService.add(Task(date = date, text = text.mkString(" ")))
         )
-      case Subcommand.Show => printLine(agendaService.show().mkString("\n"))
+      case Subcommand.Show =>
+        printLine(
+          agendaService
+            .show()
+            .sortBy(_.date)
+            .map(showTaskInConsole)
+            .mkString("\n")
+        )
       case Subcommand.Finish(id) => printLine(s"Task with id=$id is finished")
       case Subcommand.Remove(id) =>
         printLine(s"Task with id=$id is removed")
@@ -85,5 +92,8 @@ object AgendaZioCli {
     summary = text("The best agenda console tool instument"),
     command = agenda
   ) { logic(agendaService) }
+
+  private def showTaskInConsole(task: Task): String =
+    s"${task.id.getOrElse("")}: ${task.date} ${task.status}: ${task.text}"
 
 }
