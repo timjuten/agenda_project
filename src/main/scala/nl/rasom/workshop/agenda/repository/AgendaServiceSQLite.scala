@@ -70,7 +70,7 @@ object AgendaServiceSQLite {
     dbFilePath.toString()
   }
 
-  def initDatabase(dbUrl: String): Unit = {
+  private def initDatabase(dbUrl: String): Unit = {
     for {
       conn <- connect(dbUrl)
       statement = conn.createStatement()
