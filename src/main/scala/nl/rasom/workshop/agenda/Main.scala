@@ -16,9 +16,10 @@ import os.RelPath
 object Main extends ZIOCliDefault {
 
   val config: Config = ConfigFactory.load();
-  val dbFileRelativePath = config.getString("sqlite.dbFileRelativePath")
+  val dbFileRelativePath: String = config.getString("sqlite.dbFileRelativePath")
+  val dbFilePath: Path = os.home / RelPath(dbFileRelativePath)
 
-  val agendaService: AgendaService = AgendaServiceSQLite(dbFileRelativePath)
+  val agendaService: AgendaService = AgendaServiceSQLite(dbFilePath)
 
   val cliApp = AgendaZioCli.make(agendaService)
 

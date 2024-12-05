@@ -50,24 +50,25 @@ class AgendaServiceSQLite private (dbUrl: String) extends AgendaService {
 
 object AgendaServiceSQLite {
 
-  def apply(dbFileRelativePath: String): AgendaServiceSQLite = {
-    val dbFilePath: String = prepareDbFile(dbFileRelativePath)
+  def apply(dbFilePath: Path): AgendaServiceSQLite = {
+    prepareDbFile(dbFilePath)
     val dbUrl: String = "jdbc:sqlite:" + dbFilePath
     initDatabase(dbUrl)
     new AgendaServiceSQLite(dbUrl)
   }
 
-  private def prepareDbFile(dbFileRelativePath: String): String = {
-    val dbFilePath: Path = os.home / RelPath(dbFileRelativePath)
+  private def prepareDbFile(dbFilePath: Path): Unit = {
     if (!os.exists(dbFilePath / os.up))
-      os.makeDir.all(path = dbFilePath / os.up)
+      os.makeDir.all(
+        path = dbFilePath / os.up,
+        perms = Integer.parseInt("700", 8)
+      )
     if (!os.exists(dbFilePath))
       os.write(
         target = dbFilePath,
         data = "",
-        perms = Integer.parseInt("666", 8)
+        perms = Integer.parseInt("600", 8)
       )
-    dbFilePath.toString()
   }
 
   private def initDatabase(dbUrl: String): Unit = {
