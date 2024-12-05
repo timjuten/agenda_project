@@ -17,25 +17,22 @@ import nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.executeInsertStat
 import nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.executeSelectQuery
 import os.Path
 import os.RelPath
+import nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.executeRemoveStatement
+import _root_.nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.executeFinishStatement
 
 // lihaoyi https://github.com/com-lihaoyi/scalasql/blob/main/scalasql/test/src/example/SqliteExample.scala
 
 class AgendaServiceSQLite private (dbUrl: String) extends AgendaService {
 
-  override def add(task: Task): Unit = insertTask(task)
-
-  override def show(): List[Task] = getTasks()
-
-  private def insertTask(task: Task): Unit = {
+  override def add(task: Task): Unit =
     (for {
       conn <- connect(dbUrl)
       _ = executeInsertStatement(conn, task)
     } yield {
       conn.close()
     }).getOrElse(())
-  }
 
-  private def getTasks(): List[Task] = {
+  override def show(): List[Task] =
     (for {
       conn <- connect(dbUrl)
       tasks = executeSelectQuery(conn)
@@ -44,7 +41,22 @@ class AgendaServiceSQLite private (dbUrl: String) extends AgendaService {
       conn.close()
       res
     }).getOrElse(List.empty[Task])
-  }
+
+  override def remove(id: Int): Unit =
+    for {
+      conn <- connect(dbUrl)
+      _ = executeRemoveStatement(conn, id)
+    } yield {
+      conn.close()
+    }
+
+  override def finish(id: Int): Unit =
+    for {
+      conn <- connect(dbUrl)
+      _ = executeFinishStatement(conn, id)
+    } yield {
+      conn.close()
+    }
 
 }
 
@@ -116,6 +128,21 @@ object AgendaServiceSQLite {
     pstmt.setString(3, task.text)
     pstmt.executeUpdate()
 
+  }
+
+  private def executeRemoveStatement(conn: Connection, id: Int): Int = {
+    val sql = "DELETE FROM tasks WHERE id = ?"
+    val pstmt = conn.prepareStatement(sql)
+    pstmt.setInt(1, id)
+    pstmt.executeUpdate()
+  }
+
+  private def executeFinishStatement(conn: Connection, id: Int): Int = {
+    val sql = "UPDATE tasks SET status = ? WHERE id = ?"
+    val pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, Status.Done.toString())
+    pstmt.setInt(2, id)
+    pstmt.executeUpdate()
   }
 
   implicit class ResultSetOps(resultSet: ResultSet) {

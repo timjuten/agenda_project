@@ -16,14 +16,6 @@ import java.time.LocalDate
 
 object AgendaZioCli {
 
-  sealed trait Subcommand extends Product with Serializable
-  object Subcommand {
-    final case class Add(date: LocalDate, text: List[String]) extends Subcommand
-    final case class Finish(id: BigInt) extends Subcommand
-    final case class Remove(id: BigInt) extends Subcommand
-    final case object Show extends Subcommand
-  }
-
   val dateOptions: Options[LocalDate] = Options.localDate("d").alias("date")
   val addHelp: HelpDoc = HelpDoc.p("Add subcommand description")
   val add =
@@ -62,7 +54,7 @@ object AgendaZioCli {
       remove
     )
 
-  def logic(
+  private def logic(
       agendaService: AgendaService
   ): Subcommand => IO[IOException, Unit] = (subcommand: Subcommand) =>
     subcommand match {
@@ -71,16 +63,18 @@ object AgendaZioCli {
           agendaService.add(Task(date = date, text = text.mkString(" ")))
         )
       case Subcommand.Show =>
-        printLine(
-          agendaService
-            .show()
-            .sortBy(_.date)
-            .map(showTaskInConsole)
-            .mkString("\n")
-        )
-      case Subcommand.Finish(id) => printLine(s"Task with id=$id is finished")
+        executeShow(agendaService)
       case Subcommand.Remove(id) =>
-        printLine(s"Task with id=$id is removed")
+        for {
+          _ <- ZIO.succeed(agendaService.remove(id.intValue))
+          _ <- printLine(s"Task with id=$id is removed")
+          _ <- executeShow(agendaService)
+        } yield ()
+      case Subcommand.Finish(id) =>
+        for {
+          _ <- ZIO.succeed(agendaService.finish(id.intValue))
+          _ <- printLine(s"Task with id=$id is finished")
+        } yield ()
       case cmd => printLine(s"Unknown subcommand: $cmd")
     }
 
@@ -93,7 +87,14 @@ object AgendaZioCli {
     command = agenda
   ) { logic(agendaService) }
 
-  private def showTaskInConsole(task: Task): String =
-    s"${task.id.getOrElse("")}: ${task.date} ${task.status}: ${task.text}"
+  private def executeShow(agendaService: AgendaService) = 
+    for {
+          tasks <- ZIO.succeed(agendaService.show())
+          _ <-
+            if (tasks.isEmpty)
+              printLine("NO TASKS")
+            else 
+              printLine(ConsoleTable.drawTable(tasks))
 
+        } yield ()
 }
