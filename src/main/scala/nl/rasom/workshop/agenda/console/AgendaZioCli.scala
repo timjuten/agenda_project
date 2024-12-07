@@ -14,7 +14,7 @@ import zio.{IO, Scope, ZIO, ZIOAppArgs}
 object AgendaZioCli {
 
   val dateOptions: Options[LocalDate] = Options.localDate("d").alias("date")
-  val addHelp: HelpDoc = HelpDoc.p("Add subcommand description")
+  val addHelp: HelpDoc = HelpDoc.p("Add new task")
   val add = Command("add", dateOptions, Args.Variadic(Args.text("text"), Some(1), None))
     .withHelp(addHelp)
     .map { case (date, text) =>
@@ -28,7 +28,7 @@ object AgendaZioCli {
     .map { case (id) =>
       Subcommand.Finish(id = id)
     }
-  val removeHelp: HelpDoc = HelpDoc.p("The task has been deleted")
+  val removeHelp: HelpDoc = HelpDoc.p("Remove the task")
   val remove = Command("remove", indexOptions, Args.none)
     .withHelp(removeHelp)
     .map { case (id) =>

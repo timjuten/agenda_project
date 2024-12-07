@@ -16,7 +16,6 @@ lazy val agenda = (project in file("."))
     libraryDependencies += Zio,
     libraryDependencies += ZioCli,
     libraryDependencies += Sqlite,
-    libraryDependencies += Slf4j,
     libraryDependencies += TypeSafeConfig,
     libraryDependencies += OsLib,
     libraryDependencies += ScalaTest % Test
