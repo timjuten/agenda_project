@@ -1,24 +1,14 @@
 package nl.rasom.workshop.agenda.repository
 
-import nl.rasom.workshop.agenda.domain.Status
-import nl.rasom.workshop.agenda.domain.Task
-import nl.rasom.workshop.agenda.service.AgendaService
+import java.sql.{Connection, Date, DriverManager, ResultSet}
 
-import java.net.URLEncoder
-import java.sql.Connection
-import java.sql.Date
-import java.sql.DriverManager
-import java.sql.ResultSet
-import java.time.LocalDate
-import java.util.UUID
 import scala.util.Try
-import nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.connect
-import nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.executeInsertStatement
-import nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.executeSelectQuery
-import os.Path
-import os.RelPath
-import nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.executeRemoveStatement
+
 import _root_.nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.executeFinishStatement
+import nl.rasom.workshop.agenda.domain.{Status, Task}
+import nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.{connect, executeInsertStatement, executeRemoveStatement, executeSelectQuery}
+import nl.rasom.workshop.agenda.service.AgendaService
+import os.Path
 
 // lihaoyi https://github.com/com-lihaoyi/scalasql/blob/main/scalasql/test/src/example/SqliteExample.scala
 

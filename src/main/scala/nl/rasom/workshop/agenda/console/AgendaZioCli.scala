@@ -1,53 +1,46 @@
 package nl.rasom.workshop.agenda.console
 
+import java.io.IOException
+import java.time.LocalDate
+
+import nl.rasom.workshop.agenda.domain.Task
 import nl.rasom.workshop.agenda.service.AgendaService
 import zio.Console.printLine
-import zio.{IO, Scope, ZIO, ZIOAppArgs}
 import zio.cli.HelpDoc.Span.text
 import zio.cli._
-import nl.rasom.workshop.agenda.domain.Task
-
-import java.io.IOException
-import java.sql.Connection
-import java.sql.Date
-import java.sql.DriverManager
-import java.sql.ResultSet
-import java.time.LocalDate
+import zio.{IO, Scope, ZIO, ZIOAppArgs}
 
 object AgendaZioCli {
 
   val dateOptions: Options[LocalDate] = Options.localDate("d").alias("date")
   val addHelp: HelpDoc = HelpDoc.p("Add subcommand description")
-  val add =
-    Command("add", dateOptions, Args.Variadic(Args.text("text"), Some(1), None))
-      .withHelp(addHelp)
-      .map { case (date, text) =>
-        Subcommand.Add(date = date, text = text)
-      }
+  val add = Command("add", dateOptions, Args.Variadic(Args.text("text"), Some(1), None))
+    .withHelp(addHelp)
+    .map { case (date, text) =>
+      Subcommand.Add(date = date, text = text)
+    }
 
   val indexOptions: Options[BigInt] = Options.integer("i")
   val finishHelp: HelpDoc = HelpDoc.p("Mark task as done")
-  val finish =
-    Command("finish", indexOptions, Args.none)
-      .withHelp(finishHelp)
-      .map { case (id) =>
-        Subcommand.Finish(id = id)
-      }
+  val finish = Command("finish", indexOptions, Args.none)
+    .withHelp(finishHelp)
+    .map { case (id) =>
+      Subcommand.Finish(id = id)
+    }
   val removeHelp: HelpDoc = HelpDoc.p("The task has been deleted")
-  val remove =
-    Command("remove", indexOptions, Args.none)
-      .withHelp(removeHelp)
-      .map { case (id) =>
-        Subcommand.Remove(id = id)
-      }
+  val remove = Command("remove", indexOptions, Args.none)
+    .withHelp(removeHelp)
+    .map { case (id) =>
+      Subcommand.Remove(id = id)
+    }
 
   val showHelp: HelpDoc = HelpDoc.p("Show list of tasks")
   val show = Command("show", Options.none, Args.none)
     .withHelp(showHelp)
     .map { case _ => Subcommand.Show }
 
-  val agenda: Command[Subcommand] =
-    Command("agenda", Options.none, Args.none).subcommands(
+  val agenda = Command("agenda", Options.none, Args.none)
+    .subcommands(
       add,
       show,
       finish,
@@ -87,14 +80,14 @@ object AgendaZioCli {
     command = agenda
   ) { logic(agendaService) }
 
-  private def executeShow(agendaService: AgendaService) = 
+  private def executeShow(agendaService: AgendaService) =
     for {
-          tasks <- ZIO.succeed(agendaService.show())
-          _ <-
-            if (tasks.isEmpty)
-              printLine("NO TASKS")
-            else 
-              printLine(ConsoleTable.drawTable(tasks))
+      tasks <- ZIO.succeed(agendaService.show())
+      _ <-
+        if (tasks.isEmpty)
+          printLine("NO TASKS")
+        else
+          printLine(ConsoleTaskTable.drawTable(tasks))
 
-        } yield ()
+    } yield ()
 }

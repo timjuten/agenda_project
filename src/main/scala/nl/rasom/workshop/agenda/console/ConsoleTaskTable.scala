@@ -2,14 +2,14 @@ package nl.rasom.workshop.agenda.console
 
 import nl.rasom.workshop.agenda.domain.Task
 
-object ConsoleTable {
+object ConsoleTaskTable {
 
   val header: (String, String, String, String) =
     ("id", "status", "date", "text")
   val headerLengths =
     (header._1.length, header._2.length, header._3.length, header._4.length)
 
-  def maxColumnsTuple(tasks: List[Task]): (Int, Int, Int, Int) =
+  private def maxColumnsTuple(tasks: List[Task]): (Int, Int, Int, Int) =
     tasks
       .map(t =>
         (
