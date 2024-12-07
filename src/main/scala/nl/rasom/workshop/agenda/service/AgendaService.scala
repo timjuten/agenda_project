@@ -1,4 +1,5 @@
 package nl.rasom.workshop.agenda.service
+
 import nl.rasom.workshop.agenda.domain.Task
 
 trait AgendaService {

@@ -3,6 +3,7 @@ package nl.rasom.workshop.agenda.console
 import java.io.IOException
 import java.time.LocalDate
 
+import nl.rasom.workshop.agenda.console.render.ConsoleTable
 import nl.rasom.workshop.agenda.domain.Task
 import nl.rasom.workshop.agenda.service.AgendaService
 import zio.Console.printLine
@@ -83,11 +84,7 @@ object AgendaZioCli {
   private def executeShow(agendaService: AgendaService) =
     for {
       tasks <- ZIO.succeed(agendaService.show())
-      _ <-
-        if (tasks.isEmpty)
-          printLine("NO TASKS")
-        else
-          printLine(ConsoleTaskTable.drawTable(tasks))
+      _ <- printLine(ConsoleTable.drawTable(entities = tasks.sortBy(_.date), emptyListMessage = "NO TASKS"))
 
     } yield ()
 }

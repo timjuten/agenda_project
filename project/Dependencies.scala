@@ -7,4 +7,5 @@ object Dependencies {
   lazy val TypeSafeConfig = "com.typesafe" % "config" % "1.4.3"
   lazy val OsLib = "com.lihaoyi" %% "os-lib" % "0.11.3"
   lazy val ScalaTest = "org.scalatest" %% "scalatest" % "3.2.19"
+  lazy val Slf4j = "org.slf4j" % "slf4j-nop" % "2.0.16"
 }

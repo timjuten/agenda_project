@@ -4,9 +4,14 @@ import java.sql.{Connection, Date, DriverManager, ResultSet}
 
 import scala.util.Try
 
-import _root_.nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.executeFinishStatement
 import nl.rasom.workshop.agenda.domain.{Status, Task}
-import nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.{connect, executeInsertStatement, executeRemoveStatement, executeSelectQuery}
+import nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.{
+  connect,
+  executeFinishStatement,
+  executeInsertStatement,
+  executeRemoveStatement,
+  executeSelectQuery
+}
 import nl.rasom.workshop.agenda.service.AgendaService
 import os.Path
 
@@ -102,7 +107,7 @@ object AgendaServiceSQLite {
     res.map(rs => {
       Task(
         id = Some(rs.getInt("id")),
-        status = Status.fromString(rs.getString("status")),
+        status = Status.fromString(rs.getString("status")).getOrElse(throw new RuntimeException("Can't read status from db")),
         date = rs.getDate("date").toLocalDate(),
         text = rs.getString("text")
       )
