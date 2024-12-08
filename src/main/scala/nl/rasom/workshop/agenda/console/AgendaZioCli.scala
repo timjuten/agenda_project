@@ -9,6 +9,7 @@ import zio.Console.printLine
 import zio.ZIO
 import zio.cli.HelpDoc.Span.text
 import zio.cli._
+import nl.rasom.workshop.agenda.domain.Status
 
 object AgendaZioCli {
 
@@ -34,10 +35,11 @@ object AgendaZioCli {
       Subcommand.Remove(id = id)
     }
 
+  val showFilterOption: Options[Boolean] = Options.boolean("a").alias("all")
   val showHelp: HelpDoc = HelpDoc.p("Show list of tasks")
-  val show = Command("show", Options.none, Args.none)
+  val show = Command("show", showFilterOption, Args.none)
     .withHelp(showHelp)
-    .map { case _ => Subcommand.Show }
+    .map { case (a) => Subcommand.Show(a) }
 
   val agenda = Command("agenda", Options.none, Args.none)
     .subcommands(
@@ -55,13 +57,13 @@ object AgendaZioCli {
         ZIO.succeed(
           agendaService.add(Task(date = date, text = text.mkString(" ")))
         )
-      case Subcommand.Show =>
-        executeShow(agendaService)
+      case Subcommand.Show(a) =>
+        executeShow(agendaService, a)
       case Subcommand.Remove(id) =>
         for {
           _ <- ZIO.succeed(agendaService.remove(id.intValue))
           _ <- printLine(s"Task with id=$id is removed")
-          _ <- executeShow(agendaService)
+          _ <- executeShow(agendaService = agendaService, all = false)
         } yield ()
       case Subcommand.Finish(id) =>
         for {
@@ -75,15 +77,18 @@ object AgendaZioCli {
       agendaService: AgendaService
   ) = CliApp.make(
     name = "Agenda",
-    version = "0.0.1",
-    summary = text("The best agenda console tool instument"),
+    version = " 0.0.1",
+    summary = text("The simple task tracking tool"),
     command = agenda
   ) { logic(agendaService) }
 
-  private def executeShow(agendaService: AgendaService) =
+  private def executeShow(agendaService: AgendaService, all: Boolean) =
     for {
       tasks <- ZIO.succeed(agendaService.show())
-      _ <- printLine(ConsoleTable.drawTable(entities = tasks.sortBy(_.date), emptyListMessage = "NO TASKS"))
+      filteredTasks <- ZIO.succeed(
+        if (all) tasks else tasks.filter(_.status != Status.Done)
+      )
+      _ <- printLine(ConsoleTable.drawTable(entities = filteredTasks.sortBy(_.date), emptyListMessage = "NO TASKS"))
 
     } yield ()
 }
