@@ -1,15 +1,14 @@
 package nl.rasom.workshop.agenda.console
 
-import java.io.IOException
 import java.time.LocalDate
 
 import nl.rasom.workshop.agenda.console.render.ConsoleTable
 import nl.rasom.workshop.agenda.domain.Task
 import nl.rasom.workshop.agenda.service.AgendaService
 import zio.Console.printLine
+import zio.ZIO
 import zio.cli.HelpDoc.Span.text
 import zio.cli._
-import zio.{IO, Scope, ZIO, ZIOAppArgs}
 
 object AgendaZioCli {
 
@@ -50,7 +49,7 @@ object AgendaZioCli {
 
   private def logic(
       agendaService: AgendaService
-  ): Subcommand => IO[IOException, Unit] = (subcommand: Subcommand) =>
+  ) = (subcommand: Subcommand) =>
     subcommand match {
       case Subcommand.Add(date, text) =>
         ZIO.succeed(
@@ -74,7 +73,7 @@ object AgendaZioCli {
 
   def make(
       agendaService: AgendaService
-  ): CliApp[Any with ZIOAppArgs with Scope, Any, Subcommand] = CliApp.make(
+  ) = CliApp.make(
     name = "Agenda",
     version = "0.0.1",
     summary = text("The best agenda console tool instument"),
