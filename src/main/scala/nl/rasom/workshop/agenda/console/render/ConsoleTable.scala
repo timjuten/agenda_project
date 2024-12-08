@@ -36,7 +36,7 @@ object ConsoleTable {
   ): String = {
     val headerWithMaxColumns: List[(String, Int)] = header.zip(maxColumns)
     val innerString = headerWithMaxColumns.map(x => formatString(x._1, x._2)).mkString(" | ")
-    s"| $innerString |"
+    Console.BLUE + s"| $innerString |" + Console.RESET
   }
 
   private def showLineDelimeter(maxColumns: List[Int]) = {

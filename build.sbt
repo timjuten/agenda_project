@@ -18,6 +18,7 @@ lazy val agenda = (project in file("."))
     libraryDependencies += Sqlite,
     libraryDependencies += TypeSafeConfig,
     libraryDependencies += OsLib,
+    libraryDependencies += Fansi,
     libraryDependencies += ScalaTest % Test
   )
 enablePlugins(ScalafixPlugin)
