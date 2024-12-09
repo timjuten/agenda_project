@@ -21,19 +21,18 @@ object AgendaZioCli {
       Subcommand.Add(date = date, text = text)
     }
 
-  val indexOptions: Options[BigInt] = Options.integer("i")
+  val indicesOptions: Options[String] =
+    Options.text("i").alias("index", "indices") ?? "Comma separated task ids without spaces.\nExample: -l 17,18"
+
   val finishHelp: HelpDoc = HelpDoc.p("Mark task as done")
-  val finish = Command("finish", indexOptions, Args.none)
+  val finish = Command("finish", indicesOptions, Args.none)
     .withHelp(finishHelp)
-    .map { case (id) =>
-      Subcommand.Finish(id = id)
-    }
+    .map { case (ids) => Subcommand.Finish(ids = ids.split(",").map(BigInt(_)).toList) }
+
   val removeHelp: HelpDoc = HelpDoc.p("Remove the task")
-  val remove = Command("remove", indexOptions, Args.none)
+  val remove = Command("remove", indicesOptions, Args.none)
     .withHelp(removeHelp)
-    .map { case (id) =>
-      Subcommand.Remove(id = id)
-    }
+    .map { case (ids) => Subcommand.Remove(ids = ids.split(",").map(BigInt(_)).toList) }
 
   val showFilterOption: Options[Boolean] = Options.boolean("a").alias("all")
   val showHelp: HelpDoc = HelpDoc.p("Show list of tasks")
@@ -61,13 +60,13 @@ object AgendaZioCli {
         executeShow(agendaService, a)
       case Subcommand.Remove(id) =>
         for {
-          _ <- ZIO.succeed(agendaService.remove(id.intValue))
+          _ <- ZIO.succeed(agendaService.remove(id.map(_.intValue)))
           _ <- printLine(s"Task with id=$id is removed")
           _ <- executeShow(agendaService = agendaService, all = false)
         } yield ()
       case Subcommand.Finish(id) =>
         for {
-          _ <- ZIO.succeed(agendaService.finish(id.intValue))
+          _ <- ZIO.succeed(agendaService.finish(id.map(_.intValue)))
           _ <- printLine(s"Task with id=$id is finished")
         } yield ()
       case cmd => printLine(s"Unknown subcommand: $cmd")

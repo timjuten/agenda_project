@@ -52,7 +52,7 @@ class AgendaServiceSQLiteSpec extends AnyWordSpecLike with Matchers {
       val text = "simple"
 
       agendaService.add(Task(date, text))
-      agendaService.finish(id = 1)
+      agendaService.finish(ids = List(1))
 
       val results = agendaService.show()
       results.headOption shouldEqual Some(
@@ -70,7 +70,7 @@ class AgendaServiceSQLiteSpec extends AnyWordSpecLike with Matchers {
       val text = "simple"
 
       agendaService.add(Task(date, text))
-      agendaService.remove(id = 1)
+      agendaService.remove(ids = List(1))
 
       val results = agendaService.show()
       results.size shouldBe 0

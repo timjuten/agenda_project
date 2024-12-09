@@ -15,8 +15,6 @@ import nl.rasom.workshop.agenda.repository.AgendaServiceSQLite.{
 import nl.rasom.workshop.agenda.service.AgendaService
 import os.Path
 
-// lihaoyi https://github.com/com-lihaoyi/scalasql/blob/main/scalasql/test/src/example/SqliteExample.scala
-
 class AgendaServiceSQLite private (dbUrl: String) extends AgendaService {
 
   override def add(task: Task): Unit =
@@ -37,18 +35,18 @@ class AgendaServiceSQLite private (dbUrl: String) extends AgendaService {
       res
     }).getOrElse(List.empty[Task])
 
-  override def remove(id: Int): Unit =
+  override def remove(ids: List[Int]): Unit =
     for {
       conn <- connect(dbUrl)
-      _ = executeRemoveStatement(conn, id)
+      _ = executeRemoveStatement(conn, ids)
     } yield {
       conn.close()
     }
 
-  override def finish(id: Int): Unit =
+  override def finish(ids: List[Int]): Unit =
     for {
       conn <- connect(dbUrl)
-      _ = executeFinishStatement(conn, id)
+      _ = executeFinishStatement(conn, ids)
     } yield {
       conn.close()
     }
@@ -125,18 +123,22 @@ object AgendaServiceSQLite {
 
   }
 
-  private def executeRemoveStatement(conn: Connection, id: Int): Int = {
-    val sql = "DELETE FROM tasks WHERE id = ?"
+  private def executeRemoveStatement(conn: Connection, ids: List[Int]): Int = {
+    val placeholder = ids.map(_ => "?").mkString(", ")
+    val sql = s"DELETE FROM tasks WHERE id IN ($placeholder)"
     val pstmt = conn.prepareStatement(sql)
-    pstmt.setInt(1, id)
+
+    ids.zipWithIndex.map(id => pstmt.setInt(id._2 + 1, id._1))
+    println(s"statement sql $pstmt")
     pstmt.executeUpdate()
   }
 
-  private def executeFinishStatement(conn: Connection, id: Int): Int = {
-    val sql = "UPDATE tasks SET status = ? WHERE id = ?"
+  private def executeFinishStatement(conn: Connection, ids: List[Int]): Int = {
+    val placeholder = ids.map(_ => "?").mkString(", ")
+    val sql = s"UPDATE tasks SET status = ? WHERE id IN ($placeholder)"
     val pstmt = conn.prepareStatement(sql)
     pstmt.setString(1, Status.Done.toString())
-    pstmt.setInt(2, id)
+    ids.zipWithIndex.map(id => pstmt.setInt(id._2 + 2, id._1))
     pstmt.executeUpdate()
   }
 
