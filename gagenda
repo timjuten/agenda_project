@@ -1,0 +1,17 @@
+#!/bin/sh
+
+COMMAND=$(gum choose "add" "show" "finish" "remove")
+
+if [ $COMMAND = "add" ]; then 
+	DATE=$(gum input --placeholder "date" --value "$(date --iso-8601)")
+	TEXT=$(gum write --placeholder "text")
+	agenda "$COMMAND" -d "$DATE" "$TEXT" && agenda show -a
+elif [ $COMMAND = "show" ]; then 
+	agenda "$COMMAND" -a
+elif [ $COMMAND = "finish" ] || [ $COMMAND = "remove" ]; then 
+	SELECTED=$(agenda show -a | gum choose --no-limit --header "$COMMAND selected tasks:")
+	ids=$(echo "$SELECTED" | awk '{print $2}' | awk 'BEGIN{ORS=","} {print $0}')
+	echo "$SELECTED"
+	gum confirm "Are you sure to $COMMAND the following task(s)?" && agenda "$COMMAND" -i "$ids" && agenda show -a
+else echo "not supported"
+fi
