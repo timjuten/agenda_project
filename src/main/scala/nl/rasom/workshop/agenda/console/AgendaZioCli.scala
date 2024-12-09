@@ -3,13 +3,12 @@ package nl.rasom.workshop.agenda.console
 import java.time.LocalDate
 
 import nl.rasom.workshop.agenda.console.render.ConsoleTable
-import nl.rasom.workshop.agenda.domain.Task
+import nl.rasom.workshop.agenda.domain.{Status, Task}
 import nl.rasom.workshop.agenda.service.AgendaService
 import zio.Console.printLine
 import zio.ZIO
 import zio.cli.HelpDoc.Span.text
 import zio.cli._
-import nl.rasom.workshop.agenda.domain.Status
 
 object AgendaZioCli {
 
@@ -26,6 +25,7 @@ object AgendaZioCli {
 
   val finishHelp: HelpDoc = HelpDoc.p("Mark task as done")
   val finish = Command("finish", indicesOptions, Args.none)
+    .orElse(Command("done", indicesOptions, Args.none))
     .withHelp(finishHelp)
     .map { case (ids) => Subcommand.Finish(ids = ids.split(",").map(BigInt(_)).toList) }
 
@@ -37,6 +37,7 @@ object AgendaZioCli {
   val showFilterOption: Options[Boolean] = Options.boolean("a").alias("all")
   val showHelp: HelpDoc = HelpDoc.p("Show list of tasks")
   val show = Command("show", showFilterOption, Args.none)
+    .orElse(Command("list", showFilterOption, Args.none))
     .withHelp(showHelp)
     .map { case (a) => Subcommand.Show(a) }
 
