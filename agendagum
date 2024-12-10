@@ -1,0 +1,49 @@
+#!/bin/sh
+
+COMMAND=$(gum choose "show" "add" "finish" "remove" "exit")
+
+if [ $COMMAND = "add" ]; then 
+  DATE_CHOICE=$(gum choose "today" "tomorrow" "next week" "other")
+  TEXT=$(gum input --placeholder "What is your task about?")
+  if [ "$DATE_CHOICE" = "today" ]; then
+    agenda "$COMMAND" -d "$(date -d today -I)" "$TEXT" && agenda show
+  elif [ "$DATE_CHOICE" = "tomorrow" ]; then
+    agenda "$COMMAND" -d "$(date -d tomorrow -I)" "$TEXT" && agenda show
+  elif [ "$DATE_CHOICE" = "next week" ]; then
+    agenda "$COMMAND" -d "$(date -d week -I)" "$TEXT" && agenda show
+  elif [ "$DATE_CHOICE" = "other" ]; then
+    CUSTOM_DATE=$(gum input --placeholder "date" --value "$(date -d today -I)")
+    agenda "$COMMAND" -d "$CUSTOM_DATE" "$TEXT" && agenda show
+  else 
+    echo "Not supported date choice command $DATE_CHOICE"
+  fi
+elif [ $COMMAND = "show" ]; then 
+  SHOW_CHOICE=$(gum choose "new" "all")
+  if [ $SHOW_CHOICE = "all" ]; then
+    agenda "$COMMAND" -a
+  elif [ $SHOW_CHOICE = "new" ]; then
+    agenda "$COMMAND"
+  else 
+    echo "Not supported show choice $SHOW_CHOICE"
+  fi
+elif [ $COMMAND = "finish" ]; then 
+	SELECTED=$(agenda show | gum choose --no-limit --header "$COMMAND selected tasks:")
+	ids=$(echo "$SELECTED" | awk '{print $2}' | awk 'BEGIN{ORS=","} {print $0}')
+	echo "$SELECTED"
+	gum confirm "Are you sure to $COMMAND the following task(s)?" && agenda "$COMMAND" -i "$ids" && agenda show -a
+elif [ $COMMAND = "remove" ]; then 
+	SELECTED=$(agenda show -a | gum choose --no-limit --header "$COMMAND selected tasks:")
+	ids=$(echo "$SELECTED" | awk '{print $2}' | awk 'BEGIN{ORS=","} {print $0}')
+	echo "$SELECTED"
+	gum confirm "Are you sure to $COMMAND the following task(s)?" && agenda "$COMMAND" -i "$ids" && agenda show -a
+elif [ $COMMAND = "exit" ]; then 
+  echo "Good bye!"	
+else 
+  echo "Not supported command choice $COMMAND"
+fi
+
+if [ $COMMAND = "exit" ]; then 
+	echo "Have a good day!"
+else
+  agendagum
+fi
