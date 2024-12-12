@@ -1,15 +1,25 @@
 import Dependencies.*
 
-ThisBuild / scalaVersion := "2.13.12"
-ThisBuild / version := "0.1.0-SNAPSHOT"
-ThisBuild / organization := "com.example"
-ThisBuild / organizationName := "example"
+ThisBuild / scalaVersion := "2.13.15"
+ThisBuild / version := "0.1.1-SNAPSHOT"
+ThisBuild / organization := "nl.rasom.workshop"
+ThisBuild / organizationName := "Scala Workshop"
+
+ThisBuild / scalacOptions ++= Seq("-deprecation", "-feature", "-Wunused")
+ThisBuild / semanticdbEnabled := true
+ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+ThisBuild / coverageEnabled := true
+
 lazy val agenda = (project in file("."))
   .settings(
     name := "agenda",
     libraryDependencies += Zio,
     libraryDependencies += ZioCli,
     libraryDependencies += Sqlite,
-    libraryDependencies += Slf4j,
-    libraryDependencies += Munit % Test
+    libraryDependencies += TypeSafeConfig,
+    libraryDependencies += OsLib,
+    libraryDependencies += Fansi,
+    libraryDependencies += ScalaTest % Test
   )
+enablePlugins(ScalafixPlugin)
+enablePlugins(ScalafmtPlugin)
